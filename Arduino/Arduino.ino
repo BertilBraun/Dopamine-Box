@@ -4,35 +4,35 @@
 #include "Button.h"
 
 // Pin Definitions
-#define RESET_BUTTON	 2
+#define RESET_BUTTON	 52
 
 #define COUNT   8
-#define SWITCH_1 3
-#define SWITCH_2 4
-#define SWITCH_3 5
-#define SWITCH_4 6
-#define SWITCH_5 7
-#define SWITCH_6 8
-#define SWITCH_7 9
-#define SWITCH_8 10
+#define SWITCH_1 2
+#define SWITCH_2 3
+#define SWITCH_3 4
+#define SWITCH_4 5
+#define SWITCH_5 6
+#define SWITCH_6 7
+#define SWITCH_7 8
+#define SWITCH_8 9
 
-#define LED_1_GREEN 3
-#define LED_2_GREEN 4
-#define LED_3_GREEN 5
-#define LED_4_GREEN 6
-#define LED_5_GREEN 7
-#define LED_6_GREEN 8
-#define LED_7_GREEN 9
-#define LED_8_GREEN 10
+#define LED_1_GREEN 23
+#define LED_2_GREEN 25
+#define LED_3_GREEN 26
+#define LED_4_GREEN 28
+#define LED_5_GREEN 30
+#define LED_6_GREEN 32
+#define LED_7_GREEN 34
+#define LED_8_GREEN 36
 
-#define LED_1_RED 3
-#define LED_2_RED 4
-#define LED_3_RED 5
-#define LED_4_RED 6
-#define LED_5_RED 7
-#define LED_6_RED 8
-#define LED_7_RED 9
-#define LED_8_RED 10
+#define LED_1_RED 22
+#define LED_2_RED 24
+#define LED_3_RED 27
+#define LED_4_RED 29
+#define LED_5_RED 31
+#define LED_6_RED 33
+#define LED_7_RED 35
+#define LED_8_RED 37
 
 
 // Global variables and defines
@@ -51,7 +51,7 @@ int switches[COUNT] {
   SWITCH_8,
 };
 
-int greenLEDs[COUNT] {
+int redLEDs[COUNT] {
   LED_1_GREEN,
   LED_2_GREEN,
   LED_3_GREEN,
@@ -62,7 +62,7 @@ int greenLEDs[COUNT] {
   LED_8_GREEN,
 };
 
-int redLEDs[COUNT] {
+int greenLEDs[COUNT] {
   LED_1_RED,
   LED_2_RED,
   LED_3_RED,
@@ -75,7 +75,8 @@ int redLEDs[COUNT] {
 
 bool isComplete = false;
 bool stateToBeCompleted = true;
-
+int maxBrightness = 128;
+int maxBrightnessInAnimation = 255;
 
 // Setup the essentials for your circuit to work. It runs first every time your circuit is powered with electricity.
 void setup()
@@ -88,10 +89,10 @@ void setup()
   resetButton.init();
   for (int swt : switches)
     pinMode(swt, INPUT);
-	
+
   for (int led : greenLEDs)
     pinMode(led, OUTPUT);
-	
+
   for (int led : redLEDs)
     pinMode(led, OUTPUT);
 }
@@ -99,8 +100,10 @@ void setup()
 // Main logic of your circuit. It defines the interaction between the components you selected. After setup, it runs over and over again, in an eternal loop.
 void loop()
 {
-  if (resetButton.onPress())
+  if (resetButton.onPress()) {
+    Serial.println("Button Pressed!");
     stateToBeCompleted = !stateToBeCompleted;
+  }
 
   bool wasComplete = isComplete;
 
@@ -111,8 +114,13 @@ void loop()
     if (switchState != stateToBeCompleted)
       isComplete = false;
 
-    digitalWrite(greenLEDs[i], switchState);
-    digitalWrite(redLEDs[i], !switchState);
+    if (switchState == stateToBeCompleted) {
+      analogWrite(greenLEDs[i], maxBrightness);
+      analogWrite(redLEDs[i], 0);
+    } else {
+      analogWrite(greenLEDs[i], 0);
+      analogWrite(redLEDs[i], maxBrightness);
+    }
   }
 
   if (!wasComplete && isComplete)
@@ -121,4 +129,20 @@ void loop()
 
 void animation() {
   Serial.println("Animation");
+
+  for (int c = 2; c > 0; c--) {
+    for (int i = 0; i < COUNT; i++) {
+      for (int j = 0; j < COUNT; j++)
+        analogWrite(greenLEDs[j], 0);
+      analogWrite(greenLEDs[i], maxBrightness);
+      delay(25 * c);
+    }
+
+    for (int i = 0; i < COUNT; i++) {
+      for (int j = 0; j < COUNT; j++)
+        analogWrite(greenLEDs[j], 0);
+      analogWrite(greenLEDs[COUNT - i], maxBrightness);
+      delay(25 * c);
+    }
+  }
 }

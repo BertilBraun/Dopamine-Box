@@ -4,7 +4,7 @@
 #include "Button.h"
 
 // Pin Definitions
-#define RESET_BUTTON	 12
+#define RESET_BUTTON     12
 
 #define COUNT   8
 #define SWITCH_1 10
@@ -105,6 +105,10 @@ void loop()
     stateToBeCompleted = !stateToBeCompleted;
   }
 
+  // FUCK THIS SHEIT, this should not have to be here... Where is the pinmode for switches[0] changed?!?!?!
+  // IDC
+  pinMode(switches[0], INPUT);
+   
   bool wasComplete = isComplete;
 
   isComplete = true;
